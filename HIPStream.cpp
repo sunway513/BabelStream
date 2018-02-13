@@ -97,7 +97,7 @@ __global__ void init_kernel(hipLaunchParm lp, T * a, T * b, T * c, T initA, T in
 template <class T>
 void HIPStream<T>::init_arrays(T initA, T initB, T initC)
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(init_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, d_a, d_b, d_c, initA, initB, initC);
+  hipLaunchKernel(HIP_KERNEL_NAME(init_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0,(T *) d_a,(T *) d_b,(T *) d_c, initA, initB, initC);
   check_error();
   hipDeviceSynchronize();
   check_error();
@@ -126,7 +126,7 @@ __global__ void copy_kernel(hipLaunchParm lp, const T * a, T * c)
 template <class T>
 void HIPStream<T>::copy()
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(copy_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, d_a, d_c);
+  hipLaunchKernel(HIP_KERNEL_NAME(copy_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, (const T *) d_a, (T *) d_c);
   check_error();
   hipDeviceSynchronize();
   check_error();
@@ -143,7 +143,7 @@ __global__ void mul_kernel(hipLaunchParm lp, T * b, const T * c)
 template <class T>
 void HIPStream<T>::mul()
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(mul_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, d_b, d_c);
+  hipLaunchKernel(HIP_KERNEL_NAME(mul_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, (T *) d_b, (const T *) d_c);
   check_error();
   hipDeviceSynchronize();
   check_error();
@@ -159,7 +159,7 @@ __global__ void add_kernel(hipLaunchParm lp, const T * a, const T * b, T * c)
 template <class T>
 void HIPStream<T>::add()
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(add_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, d_a, d_b, d_c);
+  hipLaunchKernel(HIP_KERNEL_NAME(add_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0,(const T *) d_a,(const T *) d_b,(T *) d_c);
   check_error();
   hipDeviceSynchronize();
   check_error();
@@ -176,7 +176,7 @@ __global__ void triad_kernel(hipLaunchParm lp, T * a, const T * b, const T * c)
 template <class T>
 void HIPStream<T>::triad()
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(triad_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0, d_a, d_b, d_c);
+  hipLaunchKernel(HIP_KERNEL_NAME(triad_kernel), dim3(array_size/TBSIZE), dim3(TBSIZE), 0, 0,(T *) d_a,(const T *) d_b,(const T *) d_c);
   check_error();
   hipDeviceSynchronize();
   check_error();
@@ -210,7 +210,7 @@ __global__ void dot_kernel(hipLaunchParm lp, const T * a, const T * b, T * sum, 
 template <class T>
 T HIPStream<T>::dot()
 {
-  hipLaunchKernel(HIP_KERNEL_NAME(dot_kernel), dim3(DOT_NUM_BLOCKS), dim3(TBSIZE), 0, 0, d_a, d_b, d_sum, array_size);
+  hipLaunchKernel(HIP_KERNEL_NAME(dot_kernel), dim3(DOT_NUM_BLOCKS), dim3(TBSIZE), 0, 0, (const T *) d_a, (const T *) d_b, d_sum, array_size);
   check_error();
 
   hipMemcpy(sums, d_sum, DOT_NUM_BLOCKS*sizeof(T), hipMemcpyDeviceToHost);
